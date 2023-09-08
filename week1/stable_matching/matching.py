@@ -14,7 +14,8 @@ for _ in range(half):
     personPref = list(next(stdin).split())
     person = personPref[0]
     proposers.append(person)
-    aPrefs[person] = personPref[1:].reverse()
+    aPrefs[person] = personPref[1:]
+    aPrefs[person].reverse()
 
 for _ in range(half):
     personPref = list(next(stdin).split())
@@ -38,9 +39,11 @@ while len(proposers) != 0:
 
         if currMatchRank > proMatchRank:
             # The proposer is the new match 
-            matches[proposer]
+            matches[rejector] = proposer
             proposers.append(currentMatch) # Add back the rejected match
         else:
             proposers.append(proposer) # The proposer has been rejected
+
+for match, value in matches.items():
+    print(match + " " + value)
             
-print(bPrefs)
