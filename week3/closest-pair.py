@@ -2,11 +2,10 @@ from sys import stdin
 from point import Point
 import sys
 
-sys.setrecursionlimit(10**6)
 # Goes through all the points and calculates the shortest dist between them.
 # Returns the shortest distance pair
 def compare_points(ps, n):
-    current_min = (100000000, (Point(0,0), Point(0,0)))
+    current_min = (sys.float_info.max, (Point(0,0), Point(0,0)))
 
     for i in range(0, n-1):
         pi = ps[i]
@@ -29,50 +28,65 @@ def split_set_on_x(S, x):
     
     return a, b
 
-def check_split_line(py, line_x, min_dist_pair): 
-    min_dist, pair = min_dist_pair
+def get_mid_index(n):
+    if n % 2 == 0:
+        return n // 2
+    else:
+        return (n+1)//2
+
+def get_points_close_to_line(maxl, minl, p, mid):
+    new_p = p
+    for i in range(mid, len(p)):
+        if p[i].x > maxl:
+            new_p = new_p[:i]
+            break
+    
+    for i in range(mid-1, -1, -1):
+        if p[i].x < minl:
+            new_p = new_p[i+1:]
+            break
+    
+    return new_p
+
+def check_split_line(p, line_x, min_dist_pair, mid): 
+    min_dist, _ = min_dist_pair
     max_line_x = line_x + min_dist
     min_line_x = line_x - min_dist
 
-    sy = [p for p in py if min_line_x <= p.x <= max_line_x] # Create set close to line
-
-    current_min_dist = min_dist
-    current_min_pair = pair
+    S = get_points_close_to_line(max_line_x, min_line_x, p, mid) # Create set close to line
+    S.sort(key=lambda a: a.y) # Sort on the y coordinate
 
     # Go through set and compare them
-    n_sy = len(sy)
+    n_sy = len(S)
     for i in range(n_sy-1): # Go through all the points except the last 
-        pi = sy[pi]
-        for j in range(i+1, min(n_sy, i+15)): # Pseudo code says go through the next 15 points 
-            pj = sy[j]
-            dist = pi.distance(pj)
-            if current_min_dist > dist:
-                current_min_dist = dist
-                current_min_pair = pi, pj
+        pi = S[i]
+        for j in range(i+1, min(n_sy, i+11)): # Pseudo code says go through the next 15 points 
+            pj = S[j]
+            pair = ((pi.distance(pj)), (pi,pj))
+            min_dist_pair = min(min_dist_pair, pair, key=lambda x: x[0])
 
-    return current_min_dist, current_min_pair
+    return min_dist_pair
 
-def closests_pair(px, py):
+def closests_pair(p):
 
-    n = len(px)
+    n = len(p)
     if n <= 3:
-        return compare_points(px, n) # Go through all the points and get the shortest dist pair
+        return compare_points(p, n) # Go through all the points and get the shortest dist pair
 
-    mid_idx = len(points)//2
+    mid_idx = get_mid_index(len(p))
 
     # Divide the sorted point sets in half
-    qx = px[:mid_idx] # get left half og points
-    rx = px[mid_idx:] # get right half of points
-    max_x = qx[-1].x # Get the maximum x to form a line
-    qy, ry = split_set_on_x(py, max_x) # Get the lower and upper half of points
+    pl = p[:mid_idx] # get left half og points
+    pr = p[mid_idx:] # get right half of points
+    L = p[mid_idx].x # Get the maximum x from the left set to form a line
 
     # Find the closest pair in set Q and R
-    pair1 = closests_pair(qx, qy) 
-    pair2 = closests_pair(rx, ry) 
+    sl = closests_pair(pl) 
+    sr = closests_pair(pr) 
 
-    s =  min(pair1, pair2, key=lambda p : p[0]) # Get the pair with the lowest dist value
+    s =  min(sl, sr, key=lambda p : p[0]) # Get the pair with the lowest dist value
 
-    return check_split_line(py, max_x, s)
+    return check_split_line(p, L, s, mid_idx)
 
 if __name__ == "__main__":
     n = int(next(stdin))
@@ -84,8 +98,7 @@ if __name__ == "__main__":
 
     # Sort in x and y direction creating a set of x and y sorted points
     px = sorted(points, key=lambda p : p.x)
-    py = sorted(points, key=lambda p : p.y)
-    _, shortest_points = closests_pair(px, py)
+    _, shortest_points = closests_pair(px)
 
     p1, p2 = shortest_points
 
