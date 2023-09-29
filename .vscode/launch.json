@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["<", "${workspaceFolder}/week3/input80k.txt"]
+            "args": ["<", "${workspaceFolder}/week4/wallace/1.in"]
         }
     ]
 }
